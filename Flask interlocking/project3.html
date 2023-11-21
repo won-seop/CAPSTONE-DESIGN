@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Title Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='projectStyle3.css') }}">
+    <style>
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>YouTube Title Generator</h1>
+    </header>
+
+    <main>
+        <section class="input-section">
+            <form method="POST">
+                <label for="user_input">Enter Keywords:</label>
+                <input type="text" id="user_input" name="user_input" autocomplete="off" required placeholder="ex) keyword1, keyword2, keyword3, ..." style="color: gray;">
+                <button type="submit">Generate Titles</button>
+            </form>
+        </section>
+
+        {% if display_output %}
+        <section class="output-section" id="output-section">
+            <h2>Best Title</h2>
+            <div id="best_result">
+                <h3 class="{{ top_title_class }}">{{ top_title }}</h3>
+            </div>
+            <div>
+                <button id="toggle_lists" class="btn btn-link">Open</button>
+                <div id="result">
+                    <ul id="title_list" class="hidden">
+                        <div id = "pred">
+                            <p>Views Prediction</p>
+                        </div>
+                        {% for title, prediction in data %}
+                        <li>{{ title }}</li>
+                        <div class="bar-chart">
+                            <div class="bar" data-prediction="{{ prediction }}">
+                                <span class="bar-text">0</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </section>
+        <script>
+            var lists = document.querySelectorAll("#title_list");
+            var toggleListsBtn = document.getElementById("toggle_lists");
+            var result = document.getElementById("result");
+
+            result.style.maxHeight = "none";
+            // 페이지 로드 후 목록 숨기기
+            for (var i = 0; i < lists.length; i++) {
+                lists[i].classList.add("hidden");
+            }
+
+            toggleListsBtn.addEventListener("click", function () {
+                for (var i = 0; i < lists.length; i++) {
+                    if (lists[i].classList.contains("hidden")) {
+                        lists[i].classList.remove("hidden");
+                    } else {
+                        lists[i].classList.add("hidden");
+                    }
+                }
+
+                if (toggleListsBtn.textContent === "Open") {
+                    toggleListsBtn.textContent = "Close";
+                    result.style.display = "block";
+
+                    var bars = document.querySelectorAll(".bar");
+                    bars.forEach(function(bar) {
+                        var prediction = parseInt(bar.getAttribute("data-prediction"));
+                        var width = 0;
+                        var step = prediction / 1000;
+                        var interval = setInterval(function() {
+                            if (width >= prediction) {
+                                clearInterval(interval);
+                            } else {
+                                width += step;
+                                if (width > prediction) {
+                                    width = prediction;
+                                }
+                                bar.style.width = prediction / 100 + "px";
+                                bar.querySelector(".bar-text").innerText = Math.round(prediction);
+                            }
+                        }, 20);
+                    });
+                } else {
+                    toggleListsBtn.textContent = "Open";
+                    result.style.display = "none";
+                }
+            });
+        </script>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>&copy; 2023 YouTube Title Generator</p>
+    </footer>
+</body>
+
+</html>
